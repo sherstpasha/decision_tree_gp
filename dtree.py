@@ -1,5 +1,4 @@
 from deap import gp
-import math
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
@@ -958,52 +957,3 @@ def save_dtree(
     )
     data.to_csv(path)
     return data
-
-
-data = load_iris()
-
-X = data.data
-y = data.target
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.33)
-
-model = SelfCGPDTClassifier(2, 5, max_height=10, tour_size=3)
-
-model.init_pset(X_train.shape[1], len(set(y_train)))
-
-model.fit(X_train, y_train, X_test, y_test)
-
-
-predict_test = model.predict(X_test)
-predict_train = model.predict(X_train)
-
-acc_test = f1_score(y_test, predict_test, average="macro")
-cm_test = confusion_matrix(y_test, predict_test)
-acc_train = f1_score(y_train, predict_train, average="macro")
-cm_train = confusion_matrix(y_train, predict_train)
-
-print(acc_train)
-print(cm_train)
-print(acc_test)
-print(cm_test)
-
-stats = model.stats
-all_stats = pd.concat(
-    [
-        stats["proba"]["mutation"],
-        stats["proba"]["crossing"],
-        stats["proba"]["selection"],
-        stats["fitness"],
-    ],
-    axis=1,
-)
-
-fittest_history = np.array(model.fittest_history, dtype=object)
-fittest_history = pd.DataFrame(
-    {"tree": fittest_history[:, 0], "fitness": fittest_history[:, 1]}
-)
-
-final_tree = model.thefittest["individ"]
-final_dtree = model.thefittest["net"]
-
-print_dtree(model.thefittest["net"])
